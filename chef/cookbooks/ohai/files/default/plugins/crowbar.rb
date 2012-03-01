@@ -104,5 +104,39 @@ networks.each do |network|
   crowbar_ohai[:switch_config][network][:switch_name] = sw_name
   crowbar_ohai[:switch_config][network][:switch_port] = sw_port
   crowbar_ohai[:switch_config][network][:switch_unit] = sw_unit
+
+end
+
+
+# Find the vendor ID, device ID, and driver type for the controller for each
+# drive
+crowbar_ohai[:disk_config] = Mash.new unless crowbar_ohai[:disk_config]
+
+# Disk device names are either sd* or hd*
+file_prefixes = [ 'sd*', 'hd*' ];
+
+file_prefixes.each do |file_prefix|
+  Dir["/sys/block/" + file_prefix].each do |drive_dir|
+    drive_name = File.basename( drive_dir )
+
+    # The target of this symlink will look like this:
+    #  ../../devices/pci0000:00/0000:00:1f.2/host0/target0::0:0/0:0:0:0
+    drive_device_dir = File.readlink( drive_dir + "/device" );
+
+    # Get the directory to the controller
+    controller_dir = drive_dir + "/" + drive_device_dir.match( "(\.\./\.\./devices/pci.*?/.*?)/.*" )[1]
+
+    # Read in the vendor and device IDs for the controller
+    vendor_id = IO.read( controller_dir + "/vendor" ).chomp
+    device_id = IO.read( controller_dir + "/device" ).chomp
+
+    driver_path = File.readlink( controller_dir + "/driver" )
+    driver_type = File.basename( driver_path )
+
+    crowbar_ohai[:disk_config][drive_name] = Mash.new
+    crowbar_ohai[:disk_config][drive_name][:vendor_id] = vendor_id
+    crowbar_ohai[:disk_config][drive_name][:device_id] = device_id
+    crowbar_ohai[:disk_config][drive_name][:driver_type] = driver_type
+  end
 end
 
