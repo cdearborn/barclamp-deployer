@@ -5,13 +5,19 @@
     "deployer": {
       "use_allocate": true,
       "bios_map": [
-	{ "pattern": "hadoop-(edgenode|.*namenode)", "bios_set": "Hadoop", "raid_set": "SingleRaid10" },
-	{ "pattern": "hadoop-.*", "bios_set": "Hadoop", "raid_set": "JBODOnly" },
+        { "pattern": "hadoop-(edgenode|.*namenode)", "bios_set": "Hadoop", "raid_set": "SingleRaid10" },
+        { "pattern": "hadoop-.*", "bios_set": "Hadoop", "raid_set": "JBODOnly" },
         { "pattern": "nova-.*", "bios_set": "Virtualization", "raid_set": "SingleRaid10" },
         { "pattern": "swift-.*", "bios_set": "Storage", "raid_set": "JBODOnly" },
         { "pattern": ".*", "bios_set": "Virtualization", "raid_set": "SingleRaid10" }
       ],
-      "os_map": [ { "pattern": ".*", "install_os": "os_install" } ] 	  
+      "os_map": [ { "pattern": ".*", "install_os": "os_install" } ],
+      "os_drives": {
+        "pci_ids": [
+          { "vendor_id": "0x8086", "device_id": "0x2822" }
+        ],
+        "driver_types": [ "ahci" ]
+      }
     }
   },
   "deployment": {
