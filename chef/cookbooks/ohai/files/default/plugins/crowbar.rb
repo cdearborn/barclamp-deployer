@@ -119,6 +119,12 @@ file_prefixes.each do |file_prefix|
   Dir["/sys/block/" + file_prefix].each do |drive_dir|
     drive_name = File.basename( drive_dir )
 
+    # Is this drive removable?
+    removable = IO.read( drive_dir + "/removable" ).chomp
+
+    # Skip it if so
+    next if removable == 1 or removable == "1"
+
     # The target of this symlink will look like this:
     #  ../../devices/pci0000:00/0000:00:1f.2/host0/target0::0:0/0:0:0:0
     drive_device_dir = File.readlink( drive_dir + "/device" );
