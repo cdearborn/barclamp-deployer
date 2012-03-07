@@ -33,7 +33,7 @@
                   }
               } ]
             },
-            "os_drives": {
+            "internal_disk_config": {
               "type": "map", "required": true, "mapping": {
                 "pci_ids": {
                   "type": "seq", "required": true, "sequence": [ {
