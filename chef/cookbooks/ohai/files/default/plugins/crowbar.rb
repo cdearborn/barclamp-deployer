@@ -133,11 +133,11 @@ file_prefixes.each do |file_prefix|
     controller_dir = drive_dir + "/" + drive_device_dir.match( "(\.\./\.\./devices/pci.*?/.*?)/.*" )[1]
 
     # Read in the vendor and device IDs for the controller
-    vendor_id = IO.read( controller_dir + "/vendor" ).chomp
-    device_id = IO.read( controller_dir + "/device" ).chomp
+    vendor_id = IO.read( controller_dir + "/vendor" ).chomp.upcase
+    device_id = IO.read( controller_dir + "/device" ).chomp.upcase
 
     driver_path = File.readlink( controller_dir + "/driver" )
-    driver_type = File.basename( driver_path )
+    driver_type = File.basename( driver_path ).upcase
 
     crowbar_ohai[:disk_config][drive_name] = Mash.new
     crowbar_ohai[:disk_config][drive_name][:vendor_id] = vendor_id
