@@ -125,19 +125,29 @@ file_prefixes.each do |file_prefix|
     # Skip it if so
     next if removable == 1 or removable == "1"
 
-    # The target of this symlink will look like this:
-    #  ../../devices/pci0000:00/0000:00:1f.2/host0/target0::0:0/0:0:0:0
-    drive_device_dir = File.readlink( drive_dir + "/device" );
+    # Different versions of udev change where they symlink to the device, so be a little
+    # flexible
+    drive_device_dir=""
+    if File.symlink? drive_dir
+      drive_device_dir = File.readlink( drive_dir );
+    else
+      # Assume that drive_dir/device is the symlink
+      drive_device_dir = File.readlink( drive_dir + "/device" );
+    end
 
     # Get the directory to the controller
-    controller_dir = drive_dir + "/" + drive_device_dir.match( "(\.\./\.\./devices/pci.*?/.*?)/.*" )[1]
+    controller_dir = "/sys/" + drive_device_dir.match( "/(devices/pci.*?/.*?)/.*" )[1]
 
     # Read in the vendor and device IDs for the controller
     vendor_id = IO.read( controller_dir + "/vendor" ).chomp.upcase
     device_id = IO.read( controller_dir + "/device" ).chomp.upcase
 
-    driver_path = File.readlink( controller_dir + "/driver" )
-    driver_type = File.basename( driver_path ).upcase
+    # The driver file is missing on RHEL 6 for the front drives controller
+    driver_type=""
+    if File.symlink?( controller_dir + "/driver" )
+        driver_path = File.readlink( controller_dir + "/driver" )
+        driver_type = File.basename( driver_path ).upcase
+    end
 
     crowbar_ohai[:disk_config][drive_name] = Mash.new
     crowbar_ohai[:disk_config][drive_name][:vendor_id] = vendor_id
@@ -145,4 +155,3 @@ file_prefixes.each do |file_prefix|
     crowbar_ohai[:disk_config][drive_name][:driver_type] = driver_type
   end
 end
-
