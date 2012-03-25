@@ -149,9 +149,13 @@ file_prefixes.each do |file_prefix|
         driver_type = File.basename( driver_path ).upcase
     end
 
+    serial_number_tokens=%x[udevadm info -q property -p drive_dir|grep "ID_SERIAL="].chomp.partition(/^ID_SERIAL=/)
+    serial_number=serial_number_tokens[2]
+
     crowbar_ohai[:disk_config][drive_name] = Mash.new
     crowbar_ohai[:disk_config][drive_name][:vendor_id] = vendor_id
     crowbar_ohai[:disk_config][drive_name][:device_id] = device_id
     crowbar_ohai[:disk_config][drive_name][:driver_type] = driver_type
+    crowbar_ohai[:disk_config][drive_name][:serial_number] = serial_number
   end
 end
