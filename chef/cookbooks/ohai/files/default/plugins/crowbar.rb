@@ -149,8 +149,8 @@ file_prefixes.each do |file_prefix|
         driver_type = File.basename( driver_path ).upcase
     end
 
-    serial_number_tokens=%x[udevadm info -q property -p drive_dir|grep "ID_SERIAL="].chomp.partition(/^ID_SERIAL=/)
-    serial_number=serial_number_tokens[2]
+    serial_number_tokens=%x[hdparm -I /dev/#{drive_name} | grep "Serial Number:"].strip.partition(/^Serial Number:/)
+    serial_number=serial_number_tokens[2].lstrip
 
     crowbar_ohai[:disk_config][drive_name] = Mash.new
     crowbar_ohai[:disk_config][drive_name][:vendor_id] = vendor_id
